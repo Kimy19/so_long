@@ -6,7 +6,7 @@
 /*   By: yaekim <yaekim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/06 17:28:31 by yaekim            #+#    #+#             */
-/*   Updated: 2023/10/30 14:59:35 by yaekim           ###   ########.fr       */
+/*   Updated: 2024/05/25 19:50:29 by yaekim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@ size_t	ft_strlen(const char *s)
 {
 	int	count;
 
+	if (!s)
+		return (0);
 	count = 0;
 	while (*s != '\0')
 	{

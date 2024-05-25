@@ -1,27 +1,21 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   so_long.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: yaekim <yaekim@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/05/25 19:46:26 by yaekim            #+#    #+#             */
+/*   Updated: 2024/05/25 20:52:57 by yaekim           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "so_long.h"
 
-typedef struct	s_data {
-	void	*img;
-	char	*addr;
-	int		bits_per_pixel;
-	int		line_length;
-	int		endian;
-}				t_data;
-
-void	free_exit(t_info *info)
+void	handle_error(char *str)
 {
-	int	i;
-
-	i = 0;
-	while (i < info->row_size)
-	{
-		free(info->map[i]);
-		i++;
-	}
-	free(info->map);
-	free(info);
-	ft_printf("exit");
-	exit(0);
+	ft_printf("Error\n%s\n", str);
+	exit(1);
 }
 
 void	save_map(t_info *info, int fd, int row_size)
@@ -34,15 +28,12 @@ void	save_map(t_info *info, int fd, int row_size)
 	{
 		line = get_next_line(fd);
 		if (!line)
-		{
-			ft_printf("Here\n");
-			free_exit(info);
-		}
-		ft_printf("!! %s",line);
+			handle_error(strerror(errno));
 		(info->map)[i] = line;
 		i++;
 	}
 }
+
 void	check_map_size(t_info *info)
 {
 	int		i;
@@ -60,10 +51,7 @@ void	check_map_size(t_info *info)
 		while (info->map[i][j] && info->map[i][j] != '\n')
 			j++;
 		if (j != col_size)
-		{
-			ft_printf("Error\nThe map must be rectangular\n");
-			free_exit(info);
-		}
+			handle_error("The map must be rectangular");
 		i++;
 	}
 	info->col_size = col_size;
@@ -92,27 +80,15 @@ void	check_map_component(t_info *info)
 			else if (info->map[i][j] == 'P')
 				count[2] += 1;
 			else if (info->map[i][j] != '1' && info->map[i][j] != '0')
-			{
-				ft_printf("\n!%c!\n",info->map[i][j]);
-				ft_printf("invalid map component");
-				exit(1);
-			}
+				handle_error("Invalid map component");
 			j++;
 		}
 		i++;
 	}
-	ft_printf("%d %d %d\n",count[0],count[1],count[2]);
-
 	if (count[0] == 0)
-	{
-		ft_printf("Here4\n");
-		free_exit(info);
-	}
-	if (count[1] > 1 || count[2] > 1)
-	{
-		ft_printf("Here3\n");
-		free_exit(info);
-	}
+		handle_error("Invalid number of map component");
+	if (count[1] != 1 || count[2] != 1)
+		handle_error("Invalid number of map component");
 }
 
 void	check_wall(t_info *info)
@@ -129,20 +105,14 @@ void	check_wall(t_info *info)
 			while (j < info->col_size)
 			{
 				if (info->map[i][j] != '1')
-				{
-					ft_printf("Here1\n");
-					free_exit(info);
-				}
+					handle_error("Invalid map structure");
 				j++;
 			}
 		}
 		else
 		{
 			if (info->map[i][0] != '1' || info->map[i][info->col_size - 1] != '1')
-			{
-				ft_printf("Here2\n");
-				free_exit(info);
-			}
+				handle_error("Invalid map structure");
 		}
 		i++;
 	}
@@ -170,6 +140,7 @@ void	init_map_info(t_info *info)
 
 	i = 0;
 	map = info->map;
+	info->c_count = 0;
 	while (i < info->row_size)
 	{
 		j = 0;
@@ -250,50 +221,38 @@ void	check_path(t_info *info)
 	int	**visit;
 	int	spot[2];
 	int	i;
+	int j;
 
 	i = 0;
 	visit = (int **)malloc(sizeof(int *) * info->row_size);
 	if (!visit)
-		exit(0);
+		handle_error(strerror(errno));
 	while (i < info->row_size)
 	{
 		visit[i] = (int *)malloc(sizeof(int) * info->col_size);
 		if (!visit[i])
-			exit(0);
+			handle_error(strerror(errno));
 		i++;
 	}
-	for(int i = 0; i<info->row_size; i++)
+	i = 0;
+	j = 0;
+	while (i < info->row_size)
 	{
-		for(int j = 0; j<info->col_size; j++)
-			visit[i][j] = 0;
+		while (j < info->col_size)
+			visit[i][j++] = 0;
+		i++;
 	}
-	ft_printf("visit 값 %d\n",visit[info->exit[0]][info->exit[1]]);
-	
 	count = 0;
 	spot[0] = info->start[0];
 	spot[1] = info->start[1];
-
 	dfs(info, spot, &count, visit);
-	for(int i = 0; i<info->row_size; i++)
-	{
-		for(int j = 0; j<info->col_size; j++)
-		{
-			ft_printf("%d",visit[i][j]);
-		}
-		ft_printf("\n");
-	}
-	ft_printf("visit %d\n",visit[info->exit[0]][info->exit[1]]);
-	ft_printf("count %d %d\n",count, info->c_count);
-
 	if (visit[info->exit[0]][info->exit[1]] == 1 && count == info->c_count)
 	{
 		free_arr(visit, info);
-		ft_printf("valid path");
 		return ;
 	}
 	free_arr(visit, info);
-	ft_printf("Not valid path");
-	exit(0);
+	handle_error("Invalid map path");
 }
 
 void	check_map(t_info *info)
@@ -302,18 +261,7 @@ void	check_map(t_info *info)
 	check_wall(info);
 	check_map_component(info);
 	init_map_info(info);
-
-	ft_printf("map 출력\n");
-	for(int i = 0; i<info->row_size; i++)
-	{
-		for(int j = 0; j<info->col_size; j++)
-		{
-			ft_printf("%c",info->map[i][j]);
-		}
-		ft_printf("\n");
-	}
 	check_path(info);
-
 }
 
 void	read_map(int fd, t_info *info)
@@ -327,38 +275,51 @@ void	read_map(int fd, t_info *info)
 	while (line)
 	{
 		row_size++;
-		ft_printf("%s\n",line);
 		free(line);
 		line = get_next_line(fd);
 	}
 	if (row_size < 3)
-	{
-		exit(0);
-	}
-	ft_printf("\n처음 row size: %d",row_size);
+		handle_error("Invalid map size");
 	info->map = (char **)malloc(sizeof(char *) * row_size);
 	if (!info->map)
 		exit(0);
 	i = 0;
 	while (i < row_size)
 		info->map[i++] = NULL;
-
-
-	fd = open("map.ber", O_RDONLY);
-	ft_printf("\nfd %d",fd);
+	fd = open(info->filename, O_RDONLY);
 	save_map(info, fd, row_size);
-
-
-
 	info->row_size = row_size;
 	check_map(info);
-	// i = 0;
-	// while (i < row_size)
-	// {
-	// 	ft_printf("%s",(info->map)[i]);
-	// 	i++;
-	// }
+	close(fd);
 }
+
+void	print_steps(t_info *info, int count)
+{
+	int		x;
+	int		y;
+	char	*num;
+	char	*str;
+
+	y = (info->row_size) * IMG_SIZE;
+	while (y < (info->row_size + 1) * IMG_SIZE)
+	{
+		x = 0;
+		while (x < info->col_size * IMG_SIZE)
+		{
+			mlx_pixel_put(info->mlx, info->mlx_win, x, y, 0);
+			mlx_put_image_to_window(info->mlx, info->mlx_win, info->ground_img, x, y);
+			x += 32;
+		}
+		y += 32;
+	}
+	ft_printf("Moved %d steps\n", count);
+	num = ft_itoa(count);
+	str = ft_strjoin(num, " steps");
+	mlx_string_put(info->mlx, info->mlx_win, IMG_SIZE, (info->row_size + 0.5) * IMG_SIZE, 255, str);
+	free(num);
+	free(str);
+}
+
 void	draw_image(void *mlx, void *mlx_win, t_info *info)
 {
 	int	i;
@@ -370,25 +331,20 @@ void	draw_image(void *mlx, void *mlx_win, t_info *info)
 		j = 0;
 		while (j < info->col_size)
 		{
-			ft_printf("%c",info->map[i][j]);
-			mlx_put_image_to_window(mlx, mlx_win, info->ground_img,  32 * j,  32 * i);
-				// mlx_put_image_to_window(mlx, mlx_win, info->ground_img,  32 * j,  32 * i);
+			mlx_put_image_to_window(mlx, mlx_win, info->ground_img, IMG_SIZE * j, IMG_SIZE * i);
 			if (info->map[i][j] == '1')
-				mlx_put_image_to_window(mlx, mlx_win, info->wall_img,  32 * j,  32 * i);
+				mlx_put_image_to_window(mlx, mlx_win, info->wall_img, IMG_SIZE * j, IMG_SIZE * i);
 			else if (info->map[i][j] == 'E')
-				mlx_put_image_to_window(mlx, mlx_win, info->exit_img,  32 * j,  32 * i);
+				mlx_put_image_to_window(mlx, mlx_win, info->exit_img, IMG_SIZE * j, IMG_SIZE * i);
 			else if (info->map[i][j] == 'C')
-			{
-				mlx_put_image_to_window(mlx, mlx_win, info->coin_img,  32 * j,  32 * i);
-			}
+				mlx_put_image_to_window(mlx, mlx_win, info->coin_img, IMG_SIZE * j, IMG_SIZE * i);
 			else if (info->map[i][j] == 'P')
-			{
-				mlx_put_image_to_window(mlx, mlx_win, info->char_img,  32 * j,  32 * i);
-			}
+				mlx_put_image_to_window(mlx, mlx_win, info->char_img, IMG_SIZE * j, IMG_SIZE * i);
 			j++;
 		}
 		i++;
 	}
+	print_steps(info, 0);
 }
 
 int	key_hook(int keycode, t_info *info)
@@ -407,14 +363,11 @@ int	key_hook(int keycode, t_info *info)
 		move_right(info, &count);
 	else if (keycode ==KEY_ESC)
 	{
+		ft_printf("Exited\n");
 		exit(0);
 	}
 	if (temp < count)
-	{
-		ft_printf("Moved %d step\n", count);
-		mlx_string_put(info->mlx, info->mlx_win,64, 64, 0,"hihihihihi");
-	}
-		
+		print_steps(info, count);
 	return (0);
 }
 
@@ -429,37 +382,70 @@ void init_sprites(t_info *info)
 
 // }
 
-int	main(void)
+int	destroy_window(t_info *info)
 {
-	int		fd;
-	t_info	*info;
+	mlx_destroy_window(info->mlx, info->mlx_win);
+	ft_printf("Exited\n");
+	exit(0);
+	return (0);
+}
+
+void check_arg(t_info *info, char *argv[])
+{
+	char *str;
+	int		i;
+
+	i = 0;
+	
+	str = ft_strnstr(ft_strrchr(argv[1],'.'), ".ber", ft_strlen(argv[1]));
+	if (str == 0)
+		handle_error("Invalid type of map file");
+	while (i < 4)
+	{
+		str++;
+		i++;
+	}
+	if (*str != 0)
+		handle_error("Invalid type of map file");
+	info->filename = argv[1];
+}
+
+void	init_info(t_info *info)
+{
 	int img_width;
 	int img_height;
 
-	info = (t_info *)malloc(sizeof(t_info));
-	fd = open("map.ber", O_RDONLY);
-	if (fd < 0)
-		exit(0);
-	read_map(fd, info);
 	info->mlx = mlx_init();
+	info->mlx_win = mlx_new_window(info->mlx, info->col_size * IMG_SIZE, (info->row_size + 1) * IMG_SIZE, "so_long");
 	init_sprites(info);
-	info->mlx_win = mlx_new_window(info->mlx, info->col_size * 32, info->row_size * 32, "so_long");
-	// img.img = mlx_new_image(mlx, 1920, 1080);
-	// img.addr = mlx_get_data_addr(img.img, &img.bits_per_pixel, &img.line_length, &img.endian);
-	// mlx_put_image_to_window(mlx, mlx_win, img.img, 0, 0);
-	info->x = info->start[1] * 32;
-	info->y = info->start[0] * 32;
+	info->x = info->start[1] * IMG_SIZE;
+	info->y = info->start[0] * IMG_SIZE;
 	info->ground_img = mlx_xpm_file_to_image(info->mlx, "./images/grass.xpm",&img_width, &img_height);
 	info->wall_img = mlx_xpm_file_to_image(info->mlx, "./images/stone.xpm",&img_width, &img_height);
 	info->char_img = mlx_xpm_file_to_image(info->mlx, "./images/down.xpm",&img_width, &img_height);
 	info->coin_img = mlx_xpm_file_to_image(info->mlx, "./images/heart.xpm",&img_width, &img_height);
 	info->exit_img = mlx_xpm_file_to_image(info->mlx, "./images/door.xpm",&img_width, &img_height);
-	ft_printf("%d %d\n",img_width,img_height);
-	// mlx_put_image_to_window(mlx, mlx_win, info->ground_img, 32/1080 * 0, 32/1920 * 0);
-	// mlx_put_image_to_window(mlx, mlx_win, info->ground_img, 32 * 0, 32 * 1);
+}
 
+int	main(int argc, char *argv[])
+{
+	int		fd;
+	t_info	*info;
+
+	if (argc != 2)
+		handle_error("Wrong number of arguments");
+	info = (t_info *)malloc(sizeof(t_info));
+	if (!info)
+		handle_error(strerror(errno));
+	check_arg(info, argv);
+	fd = open(argv[1], O_RDONLY);
+	if (fd < 0)
+		handle_error(strerror(errno));
+	read_map(fd, info);
+	init_info(info);
 	draw_image(info->mlx, info->mlx_win, info);
 	mlx_key_hook(info->mlx_win, key_hook, info);
+	mlx_hook(info->mlx_win, 17, 0, destroy_window, info);
 	// mlx_loop_hook(info->mlx_win, loop_hook, info);
 	mlx_loop(info->mlx);
 	

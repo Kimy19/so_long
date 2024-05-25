@@ -1,7 +1,7 @@
 CC = gcc -Wall -Wextra -Werror
 NAME = so_long
 BONUS_NAME = checker
-SRCS = so_long.c move_character.c
+SRCS = so_long.c move_character.c move_character2.c
 OBJS = $(SRCS:.c=.o)
 BONUS_SRCS = ./bonus/bonus.c ./bonus/bonus_command1.c ./bonus/bonus_command2.c ./bonus/bonus_command3.c ./bonus/bonus_parse_args1.c ./bonus/bonus_parse_args2.c ./bonus/bonus_utils.c ./bonus/bonus_lst_utils.c
 BONUS_OBJS = $(BONUS_SRCS:.c=.o)

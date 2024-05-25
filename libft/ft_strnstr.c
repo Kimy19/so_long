@@ -6,7 +6,7 @@
 /*   By: yaekim <yaekim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/11 15:33:47 by yaekim            #+#    #+#             */
-/*   Updated: 2023/10/30 14:56:29 by yaekim           ###   ########.fr       */
+/*   Updated: 2024/05/25 19:52:00 by yaekim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ int	check_word(const char *str, const char *word, size_t len)
 
 char	*ft_strnstr(const char *haystack, const char *needle, size_t len)
 {
+	if (!haystack)
+		return (0);
 	if (!*needle)
 		return ((char *)haystack);
 	while (*haystack && len > 0)

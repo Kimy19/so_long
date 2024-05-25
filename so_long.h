@@ -6,7 +6,7 @@
 /*   By: yaekim <yaekim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:42:59 by yaekim            #+#    #+#             */
-/*   Updated: 2024/05/23 14:51:58 by yaekim           ###   ########.fr       */
+/*   Updated: 2024/05/25 20:50:15 by yaekim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # define KEY_A			0
 # define KEY_S			1
 # define KEY_D			2
+# define IMG_SIZE		32
 
 typedef struct s_sprite
 {
@@ -30,6 +31,7 @@ typedef struct s_sprite
 typedef struct s_info
 {
 	char	**map;
+	char	*filename;
 	int		c_count;
 	int		row_size;
 	int		col_size;
@@ -51,11 +53,16 @@ typedef struct s_info
 # include <stdlib.h>
 # include "./libft/libft.h"
 # include <fcntl.h>
-
+# include <errno.h>
+# include <string.h>
 
 void	move_left(t_info *info, int *count);
 void	move_right(t_info *info, int *count);
 void	move_up(t_info *info, int *count);
 void	move_down(t_info *info, int *count);
+void	check_and_draw_exit(t_info *info);
+void	check_coin(t_info *info);
+void	restore_frame(t_info *info);
+void	success_exit(void);
 
 #endif
