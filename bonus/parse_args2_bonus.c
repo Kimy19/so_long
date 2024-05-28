@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parse_args2.c                                      :+:      :+:    :+:   */
+/*   parse_args2_bonus.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yaekim <yaekim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 10:41:30 by yaekim            #+#    #+#             */
-/*   Updated: 2024/05/28 16:06:33 by yaekim           ###   ########.fr       */
+/*   Updated: 2024/05/28 16:01:04 by yaekim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "so_long.h"
+#include "so_long_bonus.h"
 
-void	count_map_component(char c, int *count)
+void	count_map_component(t_info *info, char c, int *count)
 {
 	if (c == 'C')
 		count[0] += 1;
@@ -20,8 +20,13 @@ void	count_map_component(char c, int *count)
 		count[1] += 1;
 	else if (c == 'P')
 		count[2] += 1;
-	else if (c != '1' && c != '0')
+	else if (c == 'X')
+		info->enemy_count += 1;
+	else if (c != '1' && c != '0' && c != 'X')
+	{
+		ft_printf("%c\n",c);
 		handle_error("Invalid map component");
+	}
 }
 
 void	check_map_component(t_info *info)
@@ -34,12 +39,13 @@ void	check_map_component(t_info *info)
 	count[0] = 0;
 	count[1] = 0;
 	count[2] = 0;
+	info->enemy_count = 0;
 	while (i < info->row_size)
 	{
 		j = 0;
 		while (info->map[i][j] && info->map[i][j] != '\n')
 		{
-			count_map_component(info->map[i][j], count);
+			count_map_component(info, info->map[i][j], count);
 			j++;
 		}
 		i++;

@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   so_long.c                                          :+:      :+:    :+:   */
+/*   so_long_bonus.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yaekim <yaekim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/25 19:46:26 by yaekim            #+#    #+#             */
-/*   Updated: 2024/05/28 15:49:43 by yaekim           ###   ########.fr       */
+/*   Updated: 2024/05/28 15:42:07 by yaekim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "so_long.h"
+#include "so_long_bonus.h"
 
 void	draw_by_map(t_info *info, int i, int j)
 {
@@ -24,6 +24,9 @@ void	draw_by_map(t_info *info, int i, int j)
 							IMG_SIZE * j, IMG_SIZE * i);
 	else if (info->map[i][j] == 'C')
 		mlx_put_image_to_window(info->mlx, info->mlx_win, info->coin_img, \
+							IMG_SIZE * j, IMG_SIZE * i);
+	else if (info->map[i][j] == 'X')
+		mlx_put_image_to_window(info->mlx, info->mlx_win, info->enemy_img[0], \
 							IMG_SIZE * j, IMG_SIZE * i);
 	else if (info->map[i][j] == 'P')
 		mlx_put_image_to_window(info->mlx, info->mlx_win, info->char_img, \
@@ -67,6 +70,36 @@ int	key_hook(int keycode, t_info *info)
 		destroy_window(info);
 	if (temp < count)
 		print_steps(info, count);
+	if (info->map[(info->y / 32)][(info->x / 32)] \
+		== 'X')
+	{
+		ft_printf("Eaten by snake...\nGame Over!\n");
+		exit(0);
+	}
+	return (0);
+}
+
+int	loop_hook(t_info *info)
+{
+	static int	i;
+	int			j;
+
+	j = 0;
+	if (i % 5000 == 0)
+	{
+		while (j < info->enemy_count)
+		{
+			mlx_put_image_to_window(info->mlx, info->mlx_win, info->\
+					ground_img, info->enemy_y[j] * IMG_SIZE, info->\
+					enemy_x[j] * IMG_SIZE);
+			mlx_put_image_to_window(info->mlx, info->mlx_win, \
+					info->enemy_img[info->frame_count % 4], info->\
+					enemy_y[j] * IMG_SIZE, info->enemy_x[j] * IMG_SIZE);
+			j++;
+			info->frame_count++;
+		}
+	}
+	i++;
 	return (0);
 }
 
@@ -89,6 +122,7 @@ int	main(int argc, char *argv[])
 	draw_image(info);
 	mlx_key_hook(info->mlx_win, key_hook, info);
 	mlx_hook(info->mlx_win, 17, 0, destroy_window, info);
+	mlx_loop_hook(info->mlx, loop_hook, info);
 	mlx_loop(info->mlx);
 	return (0);
 }

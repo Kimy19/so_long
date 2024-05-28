@@ -1,22 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parse_args1.c                                      :+:      :+:    :+:   */
+/*   parse_args1_bonus.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yaekim <yaekim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 10:38:25 by yaekim            #+#    #+#             */
-/*   Updated: 2024/05/28 15:48:40 by yaekim           ###   ########.fr       */
+/*   Updated: 2024/05/28 15:41:56 by yaekim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "so_long.h"
+#include "so_long_bonus.h"
+
+void	init_enemy_mem(t_info *info)
+{
+	if (!info->enemy_count)
+		return ;
+	info->enemy_x = (int *)malloc(sizeof(int) * info->enemy_count);
+	info->enemy_y = (int *)malloc(sizeof(int) * info->enemy_count);
+	if (!info->enemy_x || !info->enemy_y)
+		handle_error(strerror(errno));
+}
 
 void	check_map(t_info *info)
 {
 	check_map_size(info);
 	check_wall(info);
 	check_map_component(info);
+	init_enemy_mem(info);
 	init_map_info(info);
 	check_path(info);
 }

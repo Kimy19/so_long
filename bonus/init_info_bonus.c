@@ -1,16 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   init_info.c                                        :+:      :+:    :+:   */
+/*   init_info_bonus.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yaekim <yaekim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 19:51:30 by yaekim            #+#    #+#             */
-/*   Updated: 2024/05/28 15:59:17 by yaekim           ###   ########.fr       */
+/*   Updated: 2024/05/28 15:41:41 by yaekim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "so_long.h"
+#include "so_long_bonus.h"
+
+
+void	init_enemy_spot(t_info *info, int i, int j)
+{
+	static int	index;
+
+	info->enemy_x[index] = i;
+	info->enemy_y[index] = j;
+	index++;
+}
 
 void	init_map_info(t_info *info)
 {
@@ -28,6 +38,8 @@ void	init_map_info(t_info *info)
 		{
 			if (map[i][j] == 'C')
 				info->c_count += 1;
+			else if (map[i][j] == 'X')
+				init_enemy_spot(info, i, j);
 			else if (map[i][j] == 'E')
 				init_spot(info, i, j, 'E');
 			else if (map[i][j] == 'P')
