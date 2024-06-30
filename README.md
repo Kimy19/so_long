@@ -121,7 +121,7 @@ map.ber의 예:
 | W or ⬆️        |    Move up   |
 | A	or ⬅️        |    Move left |
 | S	or ⬇️     |    Move down   |
-| D or ➡️       |   Move para right|      
+| D or ➡️       |   Move right|      
 | Q or Esc      |   Close the game     | 
     
     
